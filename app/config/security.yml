@@ -1,0 +1,33 @@
+security:
+    encoders:
+        Symfony\Component\Security\Core\User\User: plaintext
+    role_hierarchy:
+        ROLE_ADMIN:       ROLE_USER
+        ROLE_SUPER_ADMIN: [ROLE_USER, ROLE_ADMIN, ROLE_ALLOWED_TO_SWITCH]
+        ROLE_USER:        [ROLE_USER_BASIC, ROLE_USER_DIGEST]
+    providers:
+        http_basic_provider:
+            memory:
+                users:
+                    user_http_basic: { password: httpbasicpass, roles: [ 'ROLE_USER_BASIC' ] }
+        http_digest_provider:
+            memory:
+                users:
+                    user_http_digest: { password: httpdigestpass, roles: [ 'ROLE_USER_DIGEST' ] }
+    firewalls:
+        http_basic_area:
+            pattern: ^/http/basic
+            provider: http_basic_provider
+            anonymous: ~
+            http_basic:
+                realm: "Secured Demo Area"
+        http_digest_area:
+            pattern: ^/http/digest
+            provider: http_digest_provider
+            anonymous: ~
+            http_digest:
+                key: "a_random_string"
+                realm: "secure-api"
+    access_control:
+        - { path: ^/http/basic, roles: ROLE_USER_BASIC }
+        - { path: ^/http/digest, roles: ROLE_USER_DIGEST }
